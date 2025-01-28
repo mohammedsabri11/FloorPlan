@@ -57,7 +57,7 @@ def generate_floor_plan(request):
         # Call DALL-E API (replace with your actual API call)
         api_key = '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'
         headers = {
-            "Authorization": f"Bearer {app_key}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
         data = {
