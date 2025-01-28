@@ -1,0 +1,112 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+<div class="container-fluid design-section mt-2">
+    <div class="row mt-4">
+        <!-- Left Side: User Inputs -->
+        <div class="col-md-5 p-4 input-section">
+            <h2 class="text-center mb-4">Design Your Floor Plan</h2>
+
+            <!-- Form with POST method -->
+            <form action="{% url 'generate_floor_plan' %}" method="post">
+                {% csrf_token %} <!-- CSRF token for security -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="city" class="form-label">City</label>
+                            <select class="form-select" id="city" name="city">
+                                <option selected>Choose a city</option>
+                                <option value="raydah">Raydah</option>
+                                <option value="jaddah">Jaddah</option>
+                                <option value="dammam">Dammam</option>
+                                <option value="alqseem">Alqseem</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="state" class="form-label">State</label>
+                            <select class="form-select" id="state" name="state">
+                                <option selected>Choose a State</option>
+                                <option value="dar_albetah">Dar Albetah</option>
+                                <option value="center_town">Center Town</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="apartments" class="form-label">Number of Apartments</label>
+                            <input type="number" class="form-control" id="apartments" name="apartments" min="0" placeholder="e.g., 1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="livingRooms" class="form-label">Number of Living Rooms</label>
+                            <input type="number" class="form-control" id="livingRooms" name="livingRooms" min="0" placeholder="e.g., 1">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="bedrooms" class="form-label">Number of Bedrooms</label>
+                            <input type="number" class="form-control" id="bedrooms" name="bedrooms" min="0" placeholder="e.g., 3">
+                        </div>
+                        <div class="mb-3">
+                            <label for="bathrooms" class="form-label">Number of Bathrooms</label>
+                            <input type="number" class="form-control" id="bathrooms" name="bathrooms" min="0" placeholder="e.g., 2">
+                        </div>
+                        <div class="mb-3">
+                            <label for="kitchens" class="form-label">Number of Kitchens</label>
+                            <input type="number" class="form-control" id="kitchens" name="kitchens" min="0" placeholder="e.g., 1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="additionalDetails" class="form-label">Additional Details</label>
+                            <textarea class="form-control" id="additionalDetails" name="additionalDetails" rows="4" placeholder="e.g., Include a balcony, large windows, etc."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary w-100">Generate Floor Plan</button>
+            </form>
+        </div>
+
+        <!-- Right Side: Generated Floor Plan Image -->
+        <div class="col-md-6 p-0 image-section">
+            <div class="placeholder-image">
+                <!-- Image will be updated dynamically -->
+                <img id="generated-image" src="#" alt="Generated Floor Plan" class="img-fluid">
+                <div class="overlay-text">Your Floor Plan Will Appear Here</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Add this script at the end of your template -->
+<script>
+    document.querySelector('form').addEventListener('submit', function (e) {
+        e.preventDefault(); // Prevent default form submission
+
+        // Get form data
+        const formData = new FormData(this);
+
+        // Send AJAX request
+        fetch("{% url 'generate_floor_plan' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}' // Include CSRF token
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.image_url) {
+                // Update the image source
+                document.getElementById('generated-image').src = data.image_url;
+                document.querySelector('.overlay-text').style.display = 'none'; // Hide overlay text
+            } else {
+                alert('Error: ' + (data.error || 'Unable to generate image'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+</script>
+{% endblock%}
